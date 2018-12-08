@@ -98,7 +98,7 @@ public class ServerCommand implements Command {
   }
 
   @Override
-  public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+  public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
     return source.getPermissionValue("velocity.command.server") != Tristate.FALSE;
   }
 }

@@ -16,12 +16,13 @@ public class ShutdownCommand implements Command {
   }
 
   @Override
-  public void execute(CommandSource source, String @NonNull [] args) {
+  public boolean execute(CommandSource source, String @NonNull [] args) {
     server.shutdown(true);
+    return true;
   }
 
   @Override
-  public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+  public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
     return source == server.getConsoleCommandSource();
   }
 }

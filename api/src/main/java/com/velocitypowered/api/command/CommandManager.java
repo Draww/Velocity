@@ -25,7 +25,8 @@ public interface CommandManager {
    *
    * @param source the command's source
    * @param cmdLine the command to run
-   * @return true if the command was found and executed, false if it was not
+   * @return {@link CommandResult#SUCCESSFUL} if run successfully, {@link CommandResult#DECLINED}
+   * if run but not handled, and {@link CommandResult#NOT_FOUND} if not found
    */
-  boolean execute(CommandSource source, String cmdLine);
+  CommandResult execute(CommandSource source, String cmdLine);
 }

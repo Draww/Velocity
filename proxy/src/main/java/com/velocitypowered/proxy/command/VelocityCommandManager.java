@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandResult;
 import com.velocitypowered.api.command.CommandSource;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,13 +36,13 @@ public class VelocityCommandManager implements CommandManager {
   }
 
   @Override
-  public boolean execute(@NonNull CommandSource source, @NonNull String cmdLine) {
+  public CommandResult execute(@NonNull CommandSource source, @NonNull String cmdLine) {
     Preconditions.checkNotNull(source, "invoker");
     Preconditions.checkNotNull(cmdLine, "cmdLine");
 
     String[] split = cmdLine.split(" ", -1);
     if (split.length == 0) {
-      return false;
+      return CommandResult.NOT_FOUND;
     }
 
     String alias = split[0];
@@ -49,16 +50,16 @@ public class VelocityCommandManager implements CommandManager {
     String[] actualArgs = Arrays.copyOfRange(split, 1, split.length);
     Command command = commands.get(alias.toLowerCase(Locale.ENGLISH));
     if (command == null) {
-      return false;
+      return CommandResult.NOT_FOUND;
     }
 
     try {
-      if (!command.hasPermission(source, actualArgs)) {
-        return false;
+      if (!command.shouldHandle(source, actualArgs)) {
+        return CommandResult.DECLINED;
       }
 
-      command.execute(source, actualArgs);
-      return true;
+      return command.execute(source, actualArgs) ? CommandResult.SUCCESSFUL :
+          CommandResult.DECLINED;
     } catch (Exception e) {
       throw new RuntimeException("Unable to invoke command " + cmdLine + " for " + source, e);
     }
@@ -90,7 +91,7 @@ public class VelocityCommandManager implements CommandManager {
       List<String> availableCommands = new ArrayList<>();
       for (Map.Entry<String, Command> entry : commands.entrySet()) {
         if (entry.getKey().regionMatches(true, 0, alias, 0, alias.length())
-            && entry.getValue().hasPermission(source, new String[0])) {
+            && entry.getValue().shouldHandle(source, new String[0])) {
           availableCommands.add("/" + entry.getKey());
         }
       }
@@ -106,7 +107,7 @@ public class VelocityCommandManager implements CommandManager {
     }
 
     try {
-      if (!command.hasPermission(source, actualArgs)) {
+      if (!command.shouldHandle(source, actualArgs)) {
         return ImmutableList.of();
       }
 

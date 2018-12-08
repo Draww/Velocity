@@ -15,11 +15,12 @@ public interface Command {
    *
    * @param source the source of this command
    * @param args the arguments for this command
+   * @return true if handled, false if we should forward to remote server
    */
-  void execute(CommandSource source, String @NonNull [] args);
+  boolean execute(CommandSource source, String @NonNull [] args);
 
   /**
-   * Provides tab complete suggestions for a command for a specified {@link CommandSource}.
+   * Provides tab complete suggestions for a command executed by a specified {@link CommandSource}.
    *
    * @param source the source to run the command for
    * @param currentArgs the current, partial arguments for this command
@@ -30,8 +31,8 @@ public interface Command {
   }
 
   /**
-   * Tests to check if the {@code source} has permission to use this command with the provided
-   * {@code args}.
+   * Tests to check if this command (invoked by {@code source}, with {@code args}) should be handled
+   * by the proxy.
    *
    * <p>If this method returns false, the handling will be forwarded onto
    * the players current server.</p>
@@ -40,7 +41,7 @@ public interface Command {
    * @param args the arguments for this command
    * @return whether the source has permission
    */
-  default boolean hasPermission(CommandSource source, String @NonNull [] args) {
+  default boolean shouldHandle(CommandSource source, String @NonNull [] args) {
     return true;
   }
 }

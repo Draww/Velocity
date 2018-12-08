@@ -11,7 +11,6 @@ import com.velocitypowered.api.plugin.PluginDescription;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.ProxyVersion;
 import com.velocitypowered.proxy.VelocityServer;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -46,7 +45,7 @@ public class VelocityCommand implements Command {
 
   private void usage(CommandSource source) {
     String availableCommands = subcommands.entrySet().stream()
-        .filter(e -> e.getValue().hasPermission(source, new String[0]))
+        .filter(e -> e.getValue().shouldHandle(source, new String[0]))
         .map(Map.Entry::getKey)
         .collect(Collectors.joining("|"));
     String commandText = "/velocity <" + availableCommands + ">";
@@ -54,20 +53,22 @@ public class VelocityCommand implements Command {
   }
 
   @Override
-  public void execute(CommandSource source, String @NonNull [] args) {
+  public boolean execute(CommandSource source, String @NonNull [] args) {
     if (args.length == 0) {
       usage(source);
-      return;
+      return true;
     }
 
     Command command = subcommands.get(args[0].toLowerCase(Locale.US));
     if (command == null) {
       usage(source);
-      return;
+      return true;
     }
     @SuppressWarnings("nullness")
     String[] actualArgs = Arrays.copyOfRange(args, 1, args.length);
     command.execute(source, actualArgs);
+
+    return true;
   }
 
   @Override
@@ -80,7 +81,7 @@ public class VelocityCommand implements Command {
       return subcommands.entrySet().stream()
           .filter(e -> e.getKey().regionMatches(true, 0, currentArgs[0], 0,
               currentArgs[0].length()))
-          .filter(e -> e.getValue().hasPermission(source, new String[0]))
+          .filter(e -> e.getValue().shouldHandle(source, new String[0]))
           .map(Map.Entry::getKey)
           .collect(Collectors.toList());
     }
@@ -95,9 +96,9 @@ public class VelocityCommand implements Command {
   }
 
   @Override
-  public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+  public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
     if (args.length == 0) {
-      return subcommands.values().stream().anyMatch(e -> e.hasPermission(source, args));
+      return subcommands.values().stream().anyMatch(e -> e.shouldHandle(source, args));
     }
     Command command = subcommands.get(args[0].toLowerCase(Locale.US));
     if (command == null) {
@@ -105,7 +106,7 @@ public class VelocityCommand implements Command {
     }
     @SuppressWarnings("nullness")
     String[] actualArgs = Arrays.copyOfRange(args, 1, args.length);
-    return command.hasPermission(source, actualArgs);
+    return command.shouldHandle(source, actualArgs);
   }
 
   private static class Reload implements Command {
@@ -118,7 +119,7 @@ public class VelocityCommand implements Command {
     }
 
     @Override
-    public void execute(CommandSource source, String @NonNull [] args) {
+    public boolean execute(CommandSource source, String @NonNull [] args) {
       try {
         if (server.reloadConfiguration()) {
           source.sendMessage(TextComponent.of("Configuration reloaded.", TextColor.GREEN));
@@ -133,10 +134,11 @@ public class VelocityCommand implements Command {
             "Unable to reload your configuration. Check the console for more details.",
             TextColor.RED));
       }
+      return true;
     }
 
     @Override
-    public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+    public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
       return source.getPermissionValue("velocity.command.reload") == Tristate.TRUE;
     }
   }
@@ -150,10 +152,10 @@ public class VelocityCommand implements Command {
     }
 
     @Override
-    public void execute(CommandSource source, String @NonNull [] args) {
+    public boolean execute(CommandSource source, String @NonNull [] args) {
       if (args.length != 0) {
         source.sendMessage(TextComponent.of("/velocity version", TextColor.RED));
-        return;
+        return true;
       }
 
       ProxyVersion version = server.getVersion();
@@ -186,10 +188,12 @@ public class VelocityCommand implements Command {
             .build();
         source.sendMessage(velocityWebsite);
       }
+
+      return true;
     }
 
     @Override
-    public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+    public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
       return source.getPermissionValue("velocity.command.info") != Tristate.FALSE;
     }
   }
@@ -203,10 +207,10 @@ public class VelocityCommand implements Command {
     }
 
     @Override
-    public void execute(CommandSource source, String @NonNull [] args) {
+    public boolean execute(CommandSource source, String @NonNull [] args) {
       if (args.length != 0) {
         source.sendMessage(TextComponent.of("/velocity plugins", TextColor.RED));
-        return;
+        return true;
       }
 
       List<PluginContainer> plugins = ImmutableList.copyOf(server.getPluginManager().getPlugins());
@@ -214,7 +218,7 @@ public class VelocityCommand implements Command {
 
       if (pluginCount == 0) {
         source.sendMessage(TextComponent.of("No plugins installed.", TextColor.YELLOW));
-        return;
+        return true;
       }
 
       TextComponent.Builder output = TextComponent.builder("Plugins: ")
@@ -228,6 +232,7 @@ public class VelocityCommand implements Command {
       }
 
       source.sendMessage(output.build());
+      return true;
     }
 
     private TextComponent componentForPlugin(PluginDescription description) {
@@ -260,7 +265,7 @@ public class VelocityCommand implements Command {
     }
 
     @Override
-    public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+    public boolean shouldHandle(CommandSource source, String @NonNull [] args) {
       return source.getPermissionValue("velocity.command.plugins") == Tristate.TRUE;
     }
   }

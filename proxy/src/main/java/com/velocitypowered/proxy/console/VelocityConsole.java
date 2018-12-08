@@ -1,5 +1,6 @@
 package com.velocitypowered.proxy.console;
 
+import com.velocitypowered.api.command.CommandResult;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.Tristate;
@@ -78,7 +79,8 @@ public final class VelocityConsole extends SimpleTerminalConsole implements Cons
   @Override
   protected void runCommand(String command) {
     try {
-      if (!this.server.getCommandManager().execute(this, command)) {
+      CommandResult result = this.server.getCommandManager().execute(this, command);
+      if (result == CommandResult.NOT_FOUND) {
         sendMessage(TextComponent.of("Command not found.", TextColor.RED));
       }
     } catch (Exception e) {

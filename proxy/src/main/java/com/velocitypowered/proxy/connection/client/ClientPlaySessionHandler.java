@@ -1,5 +1,6 @@
 package com.velocitypowered.proxy.connection.client;
 
+import com.velocitypowered.api.command.CommandResult;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
@@ -101,7 +102,8 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
     String msg = packet.getMessage();
     if (msg.startsWith("/")) {
       try {
-        if (!server.getCommandManager().execute(player, msg.substring(1))) {
+        CommandResult result = server.getCommandManager().execute(player, msg.substring(1));
+        if (result != CommandResult.SUCCESSFUL) {
           return false;
         }
       } catch (Exception e) {
