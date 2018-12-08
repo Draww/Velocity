@@ -27,10 +27,10 @@ public class ServerCommand implements Command {
   }
 
   @Override
-  public void execute(CommandSource source, String @NonNull [] args) {
+  public boolean execute(CommandSource source, String @NonNull [] args) {
     if (!(source instanceof Player)) {
       source.sendMessage(TextComponent.of("Only players may run this command.", TextColor.RED));
-      return;
+      return true;
     }
 
     Player player = (Player) source;
@@ -41,10 +41,11 @@ public class ServerCommand implements Command {
       if (!toConnect.isPresent()) {
         player.sendMessage(
             TextComponent.of("Server " + serverName + " doesn't exist.", TextColor.RED));
-        return;
+        return true;
       }
 
       player.createConnectionRequest(toConnect.get()).fireAndForget();
+      return true;
     } else {
       String currentServer = player.getCurrentServer().map(ServerConnection::getServerInfo)
           .map(ServerInfo::getName)
@@ -78,6 +79,7 @@ public class ServerCommand implements Command {
       }
 
       player.sendMessage(serverListBuilder.build());
+      return true;
     }
   }
 
