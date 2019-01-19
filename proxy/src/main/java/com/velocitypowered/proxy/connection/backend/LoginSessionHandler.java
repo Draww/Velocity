@@ -126,6 +126,10 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
 
       // Send keep alive to try to avoid timeouts
       serverConn.getPlayer().sendKeepAlive();
+
+      // Send a respawn packet to "confuse" the client and obscure the fact that JoinGame could take
+      // some time to be received.
+      serverConn.confuseRespawnClient();
     }
 
     smc.getChannel().config().setAutoRead(false);

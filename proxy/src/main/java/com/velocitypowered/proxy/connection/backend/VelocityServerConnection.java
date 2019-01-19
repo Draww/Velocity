@@ -29,6 +29,7 @@ import com.velocitypowered.proxy.protocol.netty.MinecraftVarintFrameDecoder;
 import com.velocitypowered.proxy.protocol.netty.MinecraftVarintLengthEncoder;
 import com.velocitypowered.proxy.protocol.packet.Handshake;
 import com.velocitypowered.proxy.protocol.packet.PluginMessage;
+import com.velocitypowered.proxy.protocol.packet.Respawn;
 import com.velocitypowered.proxy.protocol.packet.ServerLogin;
 import com.velocitypowered.proxy.server.VelocityRegisteredServer;
 import io.netty.channel.Channel;
@@ -50,6 +51,7 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
   private BackendConnectionPhase connectionPhase = BackendConnectionPhases.UNKNOWN;
   private long lastPingId;
   private long lastPingSent;
+  private int lastDimensionSent;
 
   /**
    * Initializes a new server connection.
@@ -288,4 +290,20 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
     return hasCompletedJoin;
   }
 
+  public int getLastDimensionSent() {
+    return lastDimensionSent;
+  }
+
+  public void setLastDimensionSent(int lastDimensionSent) {
+    this.lastDimensionSent = lastDimensionSent;
+  }
+
+  public void confuseRespawnClient() {
+    int tempDim = lastDimensionSent == 0 ? -1 : 0;
+    proxyPlayer.getMinecraftConnection().delayedWrite(new Respawn(tempDim, (short) 1, (short) 0,
+        "default"));
+    proxyPlayer.getMinecraftConnection().delayedWrite(new Respawn(lastDimensionSent, (short) 1,
+        (short) 0, "default"));
+    proxyPlayer.getMinecraftConnection().flush();
+  }
 }

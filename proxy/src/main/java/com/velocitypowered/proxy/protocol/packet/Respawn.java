@@ -70,7 +70,7 @@ public class Respawn implements MinecraftPacket {
     this.dimension = buf.readInt();
     this.difficulty = buf.readUnsignedByte();
     this.gamemode = buf.readUnsignedByte();
-    this.levelType = ProtocolUtils.readString(buf, 16);
+    this.levelType = ProtocolUtils.readString(buf);
   }
 
   @Override

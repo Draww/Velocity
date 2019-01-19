@@ -22,6 +22,7 @@ import com.velocitypowered.proxy.protocol.packet.JoinGame;
 import com.velocitypowered.proxy.protocol.packet.KeepAlive;
 import com.velocitypowered.proxy.protocol.packet.PlayerListItem;
 import com.velocitypowered.proxy.protocol.packet.PluginMessage;
+import com.velocitypowered.proxy.protocol.packet.Respawn;
 import com.velocitypowered.proxy.protocol.packet.TabCompleteResponse;
 import com.velocitypowered.proxy.protocol.util.PluginMessageUtil;
 import io.netty.buffer.ByteBuf;
@@ -75,6 +76,7 @@ public class BackendPlaySessionHandler implements MinecraftSessionHandler {
 
   @Override
   public boolean handle(JoinGame packet) {
+    serverConn.setLastDimensionSent(packet.getDimension());
     playerSessionHandler.handleBackendJoinGame(packet);
     return true;
   }
@@ -152,6 +154,12 @@ public class BackendPlaySessionHandler implements MinecraftSessionHandler {
           .build();
       commands.getRootNode().addChild(root);
     }
+    return false;
+  }
+
+  @Override
+  public boolean handle(Respawn packet) {
+    serverConn.setLastDimensionSent(packet.getDimension());
     return false;
   }
 

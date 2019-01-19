@@ -159,11 +159,11 @@ public enum StateRegistry {
           map(0x23, MINECRAFT_1_12, false),
           map(0x25, MINECRAFT_1_13, false));
       clientbound.register(Respawn.class, Respawn::new,
-          map(0x07, MINECRAFT_1_8, true),
-          map(0x33, MINECRAFT_1_9, true),
-          map(0x34, MINECRAFT_1_12, true),
-          map(0x35, MINECRAFT_1_12_2, true),
-          map(0x38, MINECRAFT_1_13, true));
+          map(0x07, MINECRAFT_1_8, false),
+          map(0x33, MINECRAFT_1_9, false),
+          map(0x34, MINECRAFT_1_12, false),
+          map(0x35, MINECRAFT_1_12_1, false),
+          map(0x38, MINECRAFT_1_13, false));
       clientbound.register(ResourcePackRequest.class, ResourcePackRequest::new,
           map(0x48, MINECRAFT_1_8, true),
           map(0x32, MINECRAFT_1_9, true),
